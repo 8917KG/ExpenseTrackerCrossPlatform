@@ -1,10 +1,18 @@
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, FlatList } from "react-native"
 import { useNavigation } from "@react-navigation/native"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
+import { addDoc, collection } from "firebase/firestore"
+import { AuthContext } from "../contexts/AuthContext"
+import { ExpensesContext } from "../contexts/ExpensesContext"
+import { ListItem } from "../components/ListItem"
+import { DBContext } from "../contexts/DBContext"
 
 export function HomeScreen(props) {
 
   const navigation = useNavigation()
+  const authStatus = useContext(AuthContext)
+  const Expenses = useContext(ExpensesContext)
+  const DB = useContext(DBContext)
 
   const [showModal, setShowModal] = useState(false)
   const [date, setDate] = useState("")
@@ -12,45 +20,28 @@ export function HomeScreen(props) {
   const [itemType, setItemType] = useState("")
   const [amount, setAmount] = useState("")
 
-  const saveExpense = () => {
+  const saveExpense = async () => {
     setShowModal(false)
     const itemObj = {
       date: date,
       location: location,
       itemType: itemType,
-      amount: amount
+      amount: amount,
     }
-    props.add(itemObj)
+    const path = `userExpenses/${authStatus.uid}/expenses`
+    const ref = await addDoc( collection(DB, path), itemObj )
+    setDate('')
+    setLocation('')
+    setItemType('')
+    setAmount('')
   }
 
   useEffect(() => {
-    if (!props.authStatus) {
+    if (!authStatus) {
       navigation.navigate("Sign In")
       navigation.reset({ index: 0, routes: [{ name: "Sign In" }] })
     }
-  }, [props.authStatus])
-
-
-
-  const ListItem = (props) => {
-    return (
-      <View
-        style={styles.listItem}
-      >
-        <TouchableOpacity onPress=
-          {
-            () => ListClickHandler({ date: props.date, location: props.location, itemType: props.itemType, amount: props.amount })
-          }>
-          <Text style={styles.listItemText}>
-            Expense Date: {props.date}
-            {'\n'}Location: {props.location}
-            {'\n'}Expense For: {props.itemType}
-            {'\n'}Amount: {props.amount}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
+  }, [authStatus])
 
   const ListClickHandler = (data) => {
     navigation.navigate("Expense Detail", data)
@@ -118,7 +109,7 @@ export function HomeScreen(props) {
       </TouchableOpacity>
 
       <FlatList
-        data={props.data}
+        data={Expenses}
         renderItem={
           ({ item }) =>
           (<ListItem
@@ -126,6 +117,7 @@ export function HomeScreen(props) {
             location={item.location}
             itemType={item.itemType}
             amount={item.amount}
+            handler = {ListClickHandler}
           />)
         }
         keyExtractor={item => item.id}

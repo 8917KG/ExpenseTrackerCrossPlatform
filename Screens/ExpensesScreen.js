@@ -14,7 +14,7 @@ export function ExpensesScreen( props ){
    date: date,
    location: location,
    itemType: itemType,
-   amount: amount
+   amount: amount,
   }
   props.add(itemObj)
  }

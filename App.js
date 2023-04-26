@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react';
 
 //contexts
 import { AuthContext } from './contexts/AuthContext'
-
+import { ExpensesContext } from './contexts/ExpensesContext';
+import { DBContext } from './contexts/DBContext';
 
 //Screens 
 import { HomeScreen } from './Screens/HomeScreen';
@@ -52,7 +53,6 @@ export default function App() {
   onAuthStateChanged(FBAuth, (user) => {
     if (user) {
       setAuth(user)
-      //console.log(user.uid)
     } else {
       setAuth(null)
     }
@@ -86,7 +86,7 @@ export default function App() {
   const AddData = async (item) => {
     const userId = auth.uid
     const path = `userExpenses/${userId}/expenses`
-    //const data = {id: new Date().getTime(), description: "sample expense"}
+    const data = {id: new Date().getTime(), description: "sample expense"}
     const ref = await addDoc(collection(FBdb, path), item)
   }
 
@@ -106,29 +106,51 @@ export default function App() {
     })
 
   }
-  
-  const SignOutButton = ( props ) => {
-  return (
-   <TouchableOpacity onPress= {()=> SignOut()}>
-    <Text>Logout</Text>
-   </TouchableOpacity>
-  )
- }
+
+  const SignOutButton = (props) => {
+    return (
+      <TouchableOpacity onPress={() => SignOut()}>
+        <Text>Logout</Text>
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Sign Up">
-          {(props) => <SignUpScreen {...props} handler={SignUp} authStatus={auth} />}
+          {(props) =>
+            <AuthContext.Provider value={auth}>
+              <SignUpScreen {...props} handler={SignUp} />
+            </AuthContext.Provider>
+          }
         </Stack.Screen>
         <Stack.Screen name="Sign In" >
-          {(props) => <SignInScreen {...props} handler={SignIn} authStatus={auth} />}
+          {(props) =>
+            <AuthContext.Provider value={auth}>
+              <SignInScreen {...props} handler={SignIn} />
+            </AuthContext.Provider>
+          }
         </Stack.Screen>
-        <Stack.Screen name="Expense Tracker" options = {{headerRight: () => <SignOutButton/>}}>
-          {(props) => <HomeScreen {...props} authStatus={auth} add={AddData} data = {expenseData}/>}
+        <Stack.Screen name="Expense Tracker" options={{ headerRight: () => <SignOutButton /> }}>
+          {(props) =>
+            <DBContext.Provider value={FBdb}>
+              <AuthContext.Provider value={auth}>
+                <ExpensesContext.Provider value={expenseData}>
+                  <HomeScreen {...props} authStatus={auth} add= {AddData}/>
+                </ExpensesContext.Provider>
+              </AuthContext.Provider>
+            </DBContext.Provider>
+          }
         </Stack.Screen>
         <Stack.Screen name="Expense Detail">
-          {(props) => <ExpenseDetailScreen {...props}/>}
+          {(props) =>
+            <DBContext.Provider value={FBdb}>
+              <AuthContext.Provider value={auth}>
+                <ExpenseDetailScreen {...props} />
+              </AuthContext.Provider>
+            </DBContext.Provider>
+          }
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

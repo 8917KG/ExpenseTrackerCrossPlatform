@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { useNavigation } from "@react-navigation/native"
+import { AuthContext } from "../contexts/AuthContext"
 
 
 export function SignUpScreen(props) {
@@ -12,6 +13,7 @@ export function SignUpScreen(props) {
  const [validForm, setValidForm] = useState(false)
 
  const navigation = useNavigation()
+ const authStatus = useContext(AuthContext)
 
  useEffect(() => {
   if (email.indexOf('@') > 0) {
@@ -39,11 +41,11 @@ export function SignUpScreen(props) {
  })
 
  useEffect(() => {
-  if (props.authStatus) {
+  if (authStatus) {
    //navigation.navigate("Expense Tracker")
    navigation.reset({ index: 0, routes: [{ name: "Expense Tracker" }] })
   }
- }, [props.authStatus])
+ }, [authStatus])
 
 
 
