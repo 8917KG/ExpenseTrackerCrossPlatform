@@ -32,12 +32,6 @@ export function ExpenseDetailScreen(props) {
 
  return (
   <View style={styles.viewStyle}>
-   <Text style={styles.labelText}>ID:</Text>
-   <TextInput
-    style={styles.textInput}
-    value={id}
-    onChangeText={(val) => setExpenseDate(val)} />
-
    <Text style={styles.labelText}>Expense Date:</Text>
    <TextInput
     style={styles.textInput}

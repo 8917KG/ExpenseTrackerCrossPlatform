@@ -8,14 +8,12 @@ export function ListItem( props ) {
   location: props.location,
   itemType: props.itemType,
   amount: props.amount,
-  id: props.id
  }
 
  return (
   <Pressable onPress={ () => props.handler( data )}>
    <View style={styles.listItem}>
     <Text style={styles.listItemText}>
-     ID: {props.id}
      Expense Date: {props.date}
      {'\n'}Location: {props.location}
      {'\n'}Expense For: {props.itemType}
